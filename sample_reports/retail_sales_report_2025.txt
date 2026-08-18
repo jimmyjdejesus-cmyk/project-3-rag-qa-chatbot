@@ -1,0 +1,27 @@
+# Retail & E-Commerce Annual Performance Report 2025
+
+## Executive Summary
+This report summarizes sales data and customer engagement results from fiscal year 2025 (FY20). Over the last year, total revenue grew by 14.5% year-over-year, driven largely by digital upgrades and target cohort campaigns.
+
+## Key Performance Indicators (KPIs)
+- **Total Revenue:** $12.4M (up from $10.8M in 2024)
+- **Order Volume:** 142,500 distinct orders
+- **Active Customers:** 58,200 (a 9.8% customer acquisition growth)
+- **Average Order Value (AOV):** $87.01 (a slight 1.2% reduction due to promotional discount strategies)
+
+## Product Category Breakdown
+- **Electronics:** Remained our highest revenue source, accounting for 42% ($5.2M) of total sales. However, customer acquisition cost (CAC) was highest in this category.
+- **Apparel:** Contributed 22% ($2.7M) of sales, showing a high repeat purchase rate of 34% among first-year cohorts.
+- **Home & Kitchen:** Stood at 18% ($2.2M) of sales, experiencing a holiday sales spike of 45% during November and December.
+- **Office Supplies & Books:** Represented the remaining 18% ($2.3M) combined, acting as consistent, low-cost margin drivers.
+
+## Customer Segments (RFM Analysis)
+Based on Recency, Frequency, and Monetary scores, we classify our active customer base into three main segments:
+1. **Loyal High-Value Customers (32%):** Customers who purchased within the last 30 days and have a frequency of 5+ orders per year. They represent 68% of total revenue.
+2. **Casual Active Customers (45%):** Recent buyers with low transaction volumes (1-2 orders). They have a neutral sentiment rating and are primary targets for email retention programs.
+3. **At Risk / Inactive Customers (23%):** Customers who have not ordered in the past 120+ days. Sentiment analysis on their reviews shows high rates of negative feedback concerning shipping delays and defective units.
+
+## Strategic Initiatives for 2026
+1. **RAG-based Customer Support:** Implement generative search models to enable customer agents to find details on return processes in under 5 seconds.
+2. **Predictive Stocking:** Use ARIMA forecasting on weekly sales trends to pre-allocate inventory, reducing out-of-stock events by 15%.
+3. **Loyalty Accents:** Reward the 'Loyal High-Value' cohort with custom loyalty perks to increase their customer lifetime value (LTV).
