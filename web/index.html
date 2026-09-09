@@ -4,158 +4,152 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="color-scheme" content="dark">
-  <title>NeuralRAG Studio // Hybrid Document Intelligence</title>
+  <title>Document Intelligence // Intelligent Q&amp;A Assistant</title>
   
-  <!-- Modern Google Fonts -->
+  <!-- High-Legibility Inter Font -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   
   <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
 
-  <!-- Top Navigation & Telemetry HUD -->
-  <header class="hud-header">
-    <div class="hud-brand">
-      <div class="brand-glow-dot"></div>
+  <!-- Clean Top Navigation Bar -->
+  <header class="app-navbar">
+    <div class="brand-wrapper">
+      <div class="brand-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+      </div>
       <div>
-        <h1 class="brand-title">NEURAL<span>RAG</span> STUDIO</h1>
-        <p class="brand-sub">HYBRID RECIPROCAL RANK FUSION // FAITHFULNESS AUDITOR</p>
+        <h1 class="brand-name">Document Intelligence</h1>
+        <p class="brand-tagline">Ask questions &bull; Extract metrics &bull; Verify source facts</p>
       </div>
     </div>
 
-    <!-- Live Status Indicators -->
-    <div class="hud-telemetry">
-      <div class="hud-chip status-chip" id="hudStatus">
-        <span class="pulse-dot"></span>
-        <span id="hudStatusText">CONNECTING...</span>
+    <div class="navbar-actions">
+      <div class="status-badge" id="hudStatus">
+        <span class="status-dot" id="statusDot"></span>
+        <span id="hudStatusText">Ready</span>
       </div>
-      <div class="hud-chip" id="hudChunks">
-        <span class="chip-label">CHUNKS:</span>
-        <span class="chip-val" id="hudChunkCount">0</span>
+      <div class="status-badge" id="hudChunks">
+        <span id="hudChunkCount">22</span> passages indexed
       </div>
-      <div class="hud-chip" id="hudMode">
-        <span class="chip-label">ENGINE:</span>
-        <span class="chip-val" id="hudModeText">HYBRID LOCAL</span>
-      </div>
-      <button class="btn-ghost" id="btnConfigKey" title="Configure API Credentials">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+      <button class="btn-quiet" id="btnConfigKey" title="Configure Gemini Credentials">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
         <span>API Key</span>
       </button>
     </div>
   </header>
 
-  <!-- Main App Layout Grid -->
-  <div class="app-layout">
-    
-    <!-- Sidebar: Knowledge Base & Ingestion -->
+  <!-- Main Split Layout -->
+  <div class="main-container">
+
+    <!-- Document Library Sidebar -->
     <aside class="sidebar">
-      <div class="sidebar-section">
-        <h2 class="section-heading">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
-          Knowledge Base
-        </h2>
-
-        <!-- Quick Preload Sample Card -->
-        <div class="sample-preload-card">
+      
+      <!-- Pre-loaded Sample Document -->
+      <div>
+        <h2 class="section-title">Sample Knowledge Base</h2>
+        <div class="sample-card">
           <div class="sample-card-header">
-            <span class="badge-emerald">READY TO TEST</span>
-            <span class="sample-file-type">TXT / CSV</span>
+            <span class="sample-name">Annual Retail Report (2025)</span>
+            <span class="pill-success">Ready</span>
           </div>
-          <h3 class="sample-title">Annual Retail Report 2025</h3>
-          <p class="sample-desc">Financial statements, department sales breakdown, churn analysis, and cohort metrics.</p>
-          <button class="btn-primary-sm" id="btnPreloadSample">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
-            <span>Pre-load Sample Document</span>
+          <p class="sample-desc">Enterprise revenue, department breakdown, customer churn findings, and cohort statistics.</p>
+          <button class="btn-primary-action" id="btnPreloadSample">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+            <span>Load Sample Document</span>
           </button>
-        </div>
-
-        <!-- Custom File Dropzone -->
-        <div class="upload-dropzone" id="dropZone">
-          <input type="file" id="fileInput" multiple accept=".pdf,.txt,.md,.csv" hidden>
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
-          <p class="dropzone-prompt">Drag & drop files or <span>browse</span></p>
-          <p class="dropzone-sub">Supported: PDF, TXT, MD, CSV</p>
         </div>
       </div>
 
-      <!-- Active Indexed Documents Registry -->
-      <div class="sidebar-section files-section">
-        <div class="section-header-row">
-          <h2 class="section-heading">Indexed Documents</h2>
-          <span class="file-count-badge" id="indexedFilesBadge">0 files</span>
+      <!-- Upload Custom Documents -->
+      <div>
+        <h2 class="section-title">Add Your Documents</h2>
+        <div class="dropzone" id="dropZone">
+          <input type="file" id="fileInput" multiple accept=".pdf,.txt,.md,.csv" hidden>
+          <div class="dropzone-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+          </div>
+          <p class="dropzone-text">Drop files here or <span>browse</span></p>
+          <p class="dropzone-types">PDF, TXT, Markdown, CSV</p>
         </div>
-        <ul class="file-list" id="indexedFileList">
-          <li class="file-empty-state">No documents indexed yet.</li>
+      </div>
+
+      <!-- Active Indexed Documents -->
+      <div class="documents-container">
+        <h2 class="section-title">Indexed Documents (<span id="indexedFilesBadge">0</span>)</h2>
+        <ul class="doc-list" id="indexedFileList">
+          <li class="doc-empty">No files loaded yet.</li>
         </ul>
       </div>
 
-      <!-- Architecture Footnote -->
-      <div class="sidebar-footer">
-        <div class="arch-box">
-          <div class="arch-title">HYBRID RRF ALGORITHM</div>
-          <p class="arch-text">Combines dense cosine similarity vectors with sparse BM25 term frequencies via Reciprocal Rank Fusion ($k=60$) to eliminate semantic drift.</p>
-        </div>
+      <div class="sidebar-note">
+        <strong>How it works:</strong> Queries search semantic vector embeddings and exact keywords simultaneously, verifying that every answer directly matches your source text.
       </div>
     </aside>
 
-    <!-- Main Conversation Canvas -->
-    <main class="chat-canvas">
+    <!-- Chat Area -->
+    <main class="chat-area">
       
-      <!-- Instant Suggestion Chips -->
-      <div class="prompt-chips-bar">
-        <span class="chips-label">QUICK QUERIES:</span>
-        <div class="chips-scroll">
-          <button class="prompt-chip" data-query="What was the total enterprise revenue in FY25 and year-over-year growth?">
-            📊 FY25 Total Revenue
+      <!-- Quick Prompt Suggestions -->
+      <div class="suggestion-bar">
+        <span class="suggestion-label">Suggested Questions:</span>
+        <div class="pills-track">
+          <button class="suggestion-pill" data-query="What was the total enterprise revenue in FY25 and year-over-year growth?">
+            What was total FY25 revenue?
           </button>
-          <button class="prompt-chip" data-query="Compare the Electronics department performance against Apparel in 2025.">
-            💻 Electronics vs Apparel
+          <button class="suggestion-pill" data-query="Compare the Electronics department performance against Apparel in 2025.">
+            Electronics vs. Apparel sales
           </button>
-          <button class="prompt-chip" data-query="What are the top catalysts causing customer churn according to sentiment analysis?">
-            ⚠️ Churn Risk Catalysts
+          <button class="suggestion-pill" data-query="What are the top catalysts causing customer churn according to sentiment analysis?">
+            Why are customers churning?
           </button>
-          <button class="prompt-chip" data-query="What were the customer acquisition cost (CAC) and lifetime value metrics?">
-            📈 LTV & Acquisition Metrics
+          <button class="suggestion-pill" data-query="What were the customer acquisition cost (CAC) and lifetime value metrics?">
+            Customer LTV &amp; acquisition
           </button>
         </div>
       </div>
 
-      <!-- Message History Stream -->
-      <div class="messages-stream" id="messagesStream">
-        <div class="message-card system-welcome">
-          <div class="msg-avatar system">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
+      <!-- Message Stream -->
+      <div class="messages-container" id="messagesStream">
+        <div class="message-row">
+          <div class="message-avatar assistant">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
           </div>
-          <div class="msg-body">
-            <div class="msg-header">
-              <span class="msg-author">NEURAL RAG ASSISTANT</span>
-              <span class="msg-time">STANDBY</span>
+          <div class="message-content-wrapper">
+            <div class="message-meta">
+              <span class="message-sender">Document Assistant</span>
+              <span class="message-time">Just now</span>
             </div>
-            <p>Welcome to <strong>NeuralRAG Studio</strong>. The hybrid engine fuses <strong>Dense Vector Embeddings</strong> with <strong>Sparse TF-IDF / BM25</strong> lexical retrieval and validates answer fidelity using deterministic <strong>Grounding Faithfulness Audits</strong>.</p>
-            <p class="sub-hint">Click any quick-query chip above or ask a question about your indexed documents below.</p>
+            <div class="message-bubble">
+              <p>Hello! I can answer questions, synthesize metrics, and extract facts from your reports.</p>
+              <p style="margin-top: 0.5rem; color: var(--text-secondary); font-size: 0.88rem;">
+                Click any suggested question above or type your question below. All responses are audited for factual grounding against the source documents.
+              </p>
+            </div>
           </div>
         </div>
       </div>
 
-      <!-- Floating Input Bar -->
-      <div class="chat-input-container">
-        <form class="chat-input-form" id="chatForm">
+      <!-- Clean Input Box -->
+      <div class="input-container">
+        <form class="input-box" id="chatForm">
           <input 
             type="text" 
             id="queryInput" 
-            placeholder="Ask a question about the indexed documents..." 
+            placeholder="Ask a question about the loaded documents..." 
             autocomplete="off"
             required
           />
           <button type="submit" class="btn-send" id="btnSend" aria-label="Send Query">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
           </button>
         </form>
-        <div class="input-shortcuts">
-          <span>Press <strong>Enter</strong> to submit &bull; <strong>Shift+Enter</strong> for newline</span>
-          <span class="clear-history" id="btnClearHistory">Clear Chat</span>
+        <div class="input-footnote">
+          <span>Press <strong>Enter</strong> to send &bull; <strong>Shift+Enter</strong> for newline</span>
+          <span class="link-action" id="btnClearHistory">Clear conversation</span>
         </div>
       </div>
 
@@ -165,20 +159,17 @@
 
   <!-- API Key Modal Dialog -->
   <dialog class="modal-dialog" id="keyModal">
-    <div class="modal-card">
+    <div class="modal-content">
       <div class="modal-header">
-        <h3 class="modal-title">Google Gemini Credentials</h3>
+        <h3 class="modal-title">Gemini API Key</h3>
         <button class="modal-close" id="btnCloseModal">&times;</button>
       </div>
-      <p class="modal-desc">Enter your Google Gemini API key to enable live generation via Gemini 1.5 Flash. If left empty, the engine operates in local offline fallback mode.</p>
-      <div class="modal-body">
-        <label for="apiKeyInput" class="input-label">Gemini API Key</label>
-        <input type="password" id="apiKeyInput" class="modal-input" placeholder="AIzaSy...">
-        <span class="modal-hint">Key is saved securely in your browser's local session.</span>
-      </div>
-      <div class="modal-footer">
-        <button class="btn-ghost" id="btnCancelKey">Cancel</button>
-        <button class="btn-primary" id="btnSaveKey">Save &amp; Apply Key</button>
+      <p class="modal-desc">Provide your Google Gemini API key to enable live generation. If left blank, the assistant runs in offline retrieval mode using local vectors.</p>
+      <input type="password" id="apiKeyInput" class="modal-input" placeholder="AIzaSy...">
+      <span class="modal-help">Key is stored only in your local browser session.</span>
+      <div class="modal-actions">
+        <button class="btn-quiet" id="btnCancelKey">Cancel</button>
+        <button class="btn-primary-action" id="btnSaveKey" style="width: auto; padding: 0.5rem 1rem;">Save Key</button>
       </div>
     </div>
   </dialog>

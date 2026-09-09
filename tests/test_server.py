@@ -76,11 +76,10 @@ def test_sample_ingest_and_query_flow():
 
 
 def test_static_html_serving():
-    """Verify that the root endpoint serves the modern HTML frontend."""
+    """Verify that the root endpoint serves the clean HTML frontend."""
     response = client.get("/")
     assert response.status_code == 200
-    assert "NEURAL" in response.text
-    assert "RAG" in response.text
+    assert "Document Intelligence" in response.text
 
 
 def test_reset_endpoint():

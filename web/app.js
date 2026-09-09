@@ -1,17 +1,16 @@
 /**
  * ==============================================================================
- * NeuralRAG Studio - Frontend Application Logic
+ * Document Intelligence - Client Application Logic
  * ==============================================================================
- * Connects modern Glassmorphism UI to the FastAPI Hybrid RAG endpoints.
- * Handles drag-and-drop document upload, prompt chips, and telemetry rendering.
+ * Clean, consumer-friendly state management, API querying, and document handling.
  * ==============================================================================
  */
 
 document.addEventListener('DOMContentLoaded', () => {
-  // DOM Element Selectors
+  // DOM Elements
   const hudStatusText = document.getElementById('hudStatusText');
   const hudChunkCount = document.getElementById('hudChunkCount');
-  const hudModeText = document.getElementById('hudModeText');
+  const statusDot = document.getElementById('statusDot');
   const btnPreloadSample = document.getElementById('btnPreloadSample');
   const dropZone = document.getElementById('dropZone');
   const fileInput = document.getElementById('fileInput');
@@ -28,68 +27,63 @@ document.addEventListener('DOMContentLoaded', () => {
   const btnCancelKey = document.getElementById('btnCancelKey');
   const btnSaveKey = document.getElementById('btnSaveKey');
   const apiKeyInput = document.getElementById('apiKeyInput');
-  const promptChips = document.querySelectorAll('.prompt-chip');
+  const suggestionPills = document.querySelectorAll('.suggestion-pill');
 
-  // Load persisted API key from localStorage if available
   let userApiKey = localStorage.getItem('gemini_api_key') || '';
   if (userApiKey && apiKeyInput) {
     apiKeyInput.value = userApiKey;
   }
 
   // ============================================================================
-  // TELEMETRY HUD & STATUS POLLING
+  // STATUS & TELEMETRY
   // ============================================================================
 
   async function updateSystemStatus() {
     try {
       const res = await fetch('/api/status');
-      if (!res.ok) throw new Error('Status endpoint unavailable');
+      if (!res.ok) throw new Error('Status unavailable');
       const data = await res.json();
 
-      // Update chunk metrics & HUD labels
       hudChunkCount.textContent = data.chunks_count || 0;
-      hudModeText.textContent = data.has_api_key ? 'GEMINI 1.5 HYBRID' : 'OFFLINE FALLBACK';
       
       if (data.ready) {
-        hudStatusText.textContent = 'SYSTEM READY';
-        hudStatusText.style.color = 'var(--accent-emerald)';
+        hudStatusText.textContent = data.has_api_key ? 'Ready (Gemini 1.5)' : 'Ready (Offline mode)';
+        if (statusDot) statusDot.className = 'status-dot';
       } else {
-        hudStatusText.textContent = 'NO INDEX LOADED';
-        hudStatusText.style.color = 'var(--accent-amber)';
+        hudStatusText.textContent = 'No documents loaded';
+        if (statusDot) statusDot.className = 'status-dot idle';
       }
 
-      // Render indexed documents registry
       renderIndexedFiles(data.indexed_files || []);
     } catch (err) {
-      console.warn('Telemetry update failed:', err);
-      hudStatusText.textContent = 'OFFLINE';
-      hudStatusText.style.color = 'var(--accent-rose)';
+      hudStatusText.textContent = 'Offline';
+      if (statusDot) statusDot.className = 'status-dot idle';
     }
   }
 
   function renderIndexedFiles(files) {
-    indexedFilesBadge.textContent = `${files.length} files`;
+    indexedFilesBadge.textContent = files.length;
     if (!files.length) {
-      indexedFileList.innerHTML = '<li class="file-empty-state">No documents indexed yet.</li>';
+      indexedFileList.innerHTML = '<li class="doc-empty">No files loaded yet.</li>';
       return;
     }
 
     indexedFileList.innerHTML = files.map(file => `
-      <li class="file-item">
-        <span class="file-item-name" title="${file}">📄 ${file}</span>
-        <span class="badge-emerald" style="font-size:0.6rem;">INDEXED</span>
+      <li class="doc-item">
+        <span class="doc-name" title="${file}">📄 ${escapeHTML(file)}</span>
+        <span class="pill-success" style="font-size: 0.65rem;">Loaded</span>
       </li>
     `).join('');
   }
 
   // ============================================================================
-  // DOCUMENT INGESTION HANDLERS
+  // DOCUMENT INGESTION
   // ============================================================================
 
-  // 1. One-click Preload Sample Document
+  // Preload Sample Document
   btnPreloadSample.addEventListener('click', async () => {
     btnPreloadSample.disabled = true;
-    btnPreloadSample.innerHTML = `<span>Ingesting Sample Report...</span>`;
+    btnPreloadSample.innerHTML = `<span>Loading Report...</span>`;
 
     try {
       const res = await fetch('/api/ingest-sample', {
@@ -102,58 +96,53 @@ document.addEventListener('DOMContentLoaded', () => {
       });
 
       const data = await res.json();
-      if (!res.ok) throw new Error(data.detail || 'Failed to ingest sample');
+      if (!res.ok) throw new Error(data.detail || 'Ingestion failed');
 
-      addSystemMessage(`✓ Successfully indexed sample report. Added ${data.chunks_added} semantic chunks.`);
+      addSystemMessage(`Annual Retail Report (2025) has been loaded with ${data.chunks_added} searchable passages.`);
       await updateSystemStatus();
     } catch (err) {
-      alert(`Ingest error: ${err.message}`);
+      alert(`Could not load sample: ${err.message}`);
     } finally {
       btnPreloadSample.disabled = false;
       btnPreloadSample.innerHTML = `
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
-        <span>Pre-load Sample Document</span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+        <span>Load Sample Document</span>
       `;
     }
   });
 
-  // 2. Drag & Drop File Uploads
+  // Drag and Drop File Ingest
   dropZone.addEventListener('click', () => fileInput.click());
 
-  ['dragenter', 'dragover'].forEach(eventName => {
-    dropZone.addEventListener(eventName, (e) => {
+  ['dragenter', 'dragover'].forEach(name => {
+    dropZone.addEventListener(name, (e) => {
       e.preventDefault();
       dropZone.classList.add('dragover');
     });
   });
 
-  ['dragleave', 'drop'].forEach(eventName => {
-    dropZone.addEventListener(eventName, (e) => {
+  ['dragleave', 'drop'].forEach(name => {
+    dropZone.addEventListener(name, (e) => {
       e.preventDefault();
       dropZone.classList.remove('dragover');
     });
   });
 
   dropZone.addEventListener('drop', (e) => {
-    const dt = e.dataTransfer;
-    const files = dt.files;
-    if (files.length) handleFileUpload(files);
+    const files = e.dataTransfer.files;
+    if (files.length) handleFiles(files);
   });
 
   fileInput.addEventListener('change', () => {
-    if (fileInput.files.length) handleFileUpload(fileInput.files);
+    if (fileInput.files.length) handleFiles(fileInput.files);
   });
 
-  async function handleFileUpload(fileList) {
+  async function handleFiles(fileList) {
     const formData = new FormData();
-    for (const file of fileList) {
-      formData.append('files', file);
-    }
-    if (userApiKey) {
-      formData.append('api_key', userApiKey);
-    }
+    for (const f of fileList) formData.append('files', f);
+    if (userApiKey) formData.append('api_key', userApiKey);
 
-    addSystemMessage(`Parsing and indexing ${fileList.length} uploaded document(s)...`);
+    addSystemMessage(`Processing ${fileList.length} document(s)...`);
 
     try {
       const res = await fetch('/api/ingest', {
@@ -161,9 +150,9 @@ document.addEventListener('DOMContentLoaded', () => {
         body: formData
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.detail || 'Ingestion failed');
+      if (!res.ok) throw new Error(data.detail || 'Upload failed');
 
-      addSystemMessage(`✓ Indexed: ${data.files_indexed.join(', ')} (+${data.chunks_added} chunks).`);
+      addSystemMessage(`Successfully added: ${data.files_indexed.join(', ')} (${data.chunks_added} passages parsed).`);
       await updateSystemStatus();
     } catch (err) {
       alert(`Upload error: ${err.message}`);
@@ -173,13 +162,13 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // ============================================================================
-  // CONVERSATION & QUERY EXECUTION
+  // QUESTION / ANSWER INTERACTION
   // ============================================================================
 
-  // Handle Quick-Query Prompt Chips
-  promptChips.forEach(chip => {
-    chip.addEventListener('click', () => {
-      const q = chip.getAttribute('data-query');
+  // Suggestion Pills
+  suggestionPills.forEach(pill => {
+    pill.addEventListener('click', () => {
+      const q = pill.getAttribute('data-query');
       if (q) {
         queryInput.value = q;
         chatForm.dispatchEvent(new Event('submit'));
@@ -187,20 +176,18 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // Handle Query Submission
+  // Submit Query
   chatForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     const query = queryInput.value.trim();
     if (!query) return;
 
-    // Append User Message Card
     addUserMessage(query);
     queryInput.value = '';
     btnSend.disabled = true;
 
-    // Append Loading Thinking Card
-    const loadingCardId = 'loading-' + Date.now();
-    addLoadingMessage(loadingCardId);
+    const loadingId = 'loading-' + Date.now();
+    addLoadingMessage(loadingId);
 
     try {
       const res = await fetch('/api/query', {
@@ -214,169 +201,156 @@ document.addEventListener('DOMContentLoaded', () => {
       });
 
       const data = await res.json();
-      removeLoadingMessage(loadingCardId);
+      removeElement(loadingId);
 
       if (!res.ok) {
-        addAssistantMessage(`⚠️ **Query Error**: ${data.detail || 'Unable to retrieve answer. Please ensure knowledge base is ingested.'}`, null);
+        addAssistantMessage(`Could not complete search: ${data.detail || 'Please verify documents are loaded.'}`, null);
         return;
       }
 
-      // Render Assistant Response with Telemetry & Citations
       addAssistantMessage(data.answer, data);
     } catch (err) {
-      removeLoadingMessage(loadingCardId);
-      addAssistantMessage(`⚠️ **Network Error**: Failed to communicate with RAG backend. (${err.message})`, null);
+      removeElement(loadingId);
+      addAssistantMessage(`Connection error: ${err.message}`, null);
     } finally {
       btnSend.disabled = false;
       queryInput.focus();
     }
   });
 
-  // Message Rendering Functions
+  // Message Renderers
   function addUserMessage(text) {
-    const card = document.createElement('div');
-    card.className = 'message-card user';
-    card.innerHTML = `
-      <div class="msg-avatar user">
+    const row = document.createElement('div');
+    row.className = 'message-row user';
+    row.innerHTML = `
+      <div class="message-avatar user">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
       </div>
-      <div class="msg-body">
-        <div class="msg-header">
-          <span class="msg-author">USER</span>
-          <span class="msg-time">${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+      <div class="message-content-wrapper">
+        <div class="message-meta">
+          <span class="message-sender">You</span>
+          <span class="message-time">${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
         </div>
-        <p>${escapeHTML(text)}</p>
+        <div class="message-bubble">${escapeHTML(text)}</div>
       </div>
     `;
-    messagesStream.appendChild(card);
+    messagesStream.appendChild(row);
     scrollToBottom();
   }
 
   function addAssistantMessage(text, meta) {
-    const card = document.createElement('div');
-    card.className = 'message-card';
-    
-    // Determine Faithfulness Color & Label
-    let faithfulnessHtml = '';
+    const row = document.createElement('div');
+    row.className = 'message-row';
+
+    let groundingHtml = '';
     if (meta && typeof meta.faithfulness === 'number') {
       const pct = Math.round(meta.faithfulness * 100);
-      const tierClass = pct >= 75 ? 'high' : pct >= 50 ? 'medium' : 'low';
-      
-      faithfulnessHtml = `
-        <div class="telemetry-card">
-          <div class="telemetry-meta">
-            <div class="faithfulness-badge ${tierClass}">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
-              <span>${pct}% Grounding Faithfulness</span>
-            </div>
-            <span class="retrieval-mode-badge">${escapeHTML(meta.mode || 'Dense + TF-IDF RRF')}</span>
+      groundingHtml = `
+        <div class="grounding-box">
+          <div class="grounding-header">
+            <span class="fidelity-pill">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+              ${pct}% Source Grounded
+            </span>
+            <span class="retrieval-caption">Retrieved from ${meta.sources?.length || 0} excerpts</span>
           </div>
-
-          ${renderCitations(meta.sources || [])}
+          ${renderSources(meta.sources || [])}
         </div>
       `;
     }
 
-    card.innerHTML = `
-      <div class="msg-avatar assistant">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
+    row.innerHTML = `
+      <div class="message-avatar assistant">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
       </div>
-      <div class="msg-body">
-        <div class="msg-header">
-          <span class="msg-author">NEURAL RAG ASSISTANT</span>
-          <span class="msg-time">${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+      <div class="message-content-wrapper">
+        <div class="message-meta">
+          <span class="message-sender">Document Assistant</span>
+          <span class="message-time">${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
         </div>
-        <div class="msg-content">${formatAnswerText(text)}</div>
-        ${faithfulnessHtml}
+        <div class="message-bubble">${cleanAnswerFormat(text)}</div>
+        ${groundingHtml}
       </div>
     `;
-    messagesStream.appendChild(card);
+    messagesStream.appendChild(row);
     scrollToBottom();
   }
 
-  function renderCitations(sources) {
+  function renderSources(sources) {
     if (!sources || !sources.length) return '';
 
-    const items = sources.map((s, i) => `
-      <div class="citation-item">
-        <div class="citation-header">
-          <span>SOURCE [${i + 1}]: ${escapeHTML(s.source)} (Chunk #${s.chunk_id})</span>
-          <div class="citation-scores">
-            <span>RRF: ${s.rrf_score}</span>
-            <span>Dense: ${s.dense_score}</span>
-            <span>BM25: ${s.tfidf_score}</span>
-          </div>
+    const list = sources.map((s, i) => `
+      <div class="source-card">
+        <div class="source-card-header">
+          <span>Source ${i + 1}: ${escapeHTML(s.source)} (Passage #${s.chunk_id})</span>
         </div>
-        <p class="citation-text">"${escapeHTML(s.text)}"</p>
+        <div class="source-card-text">"${escapeHTML(s.text)}"</div>
       </div>
     `).join('');
 
     return `
-      <details class="citations-details">
-        <summary class="citations-summary">Inspect ${sources.length} Retrieved Knowledge Excerpts</summary>
-        <div class="citations-list">${items}</div>
+      <details class="sources-details">
+        <summary class="sources-summary">View source excerpts (${sources.length})</summary>
+        <div class="sources-list">${list}</div>
       </details>
     `;
   }
 
   function addLoadingMessage(id) {
-    const card = document.createElement('div');
-    card.className = 'message-card';
-    card.id = id;
-    card.innerHTML = `
-      <div class="msg-avatar assistant">
-        <span class="pulse-dot"></span>
+    const row = document.createElement('div');
+    row.className = 'message-row';
+    row.id = id;
+    row.innerHTML = `
+      <div class="message-avatar assistant">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 14 14"></polyline></svg>
       </div>
-      <div class="msg-body">
-        <div class="msg-header">
-          <span class="msg-author">NEURAL RAG ASSISTANT</span>
-          <span class="msg-time">QUERYING HYBRID INDEX...</span>
+      <div class="message-content-wrapper">
+        <div class="message-meta">
+          <span class="message-sender">Document Assistant</span>
+          <span class="message-time">Searching...</span>
         </div>
-        <p style="color:var(--text-muted); font-style:italic;">Executing Dense Embeddings + BM25 Reciprocal Rank Fusion...</p>
+        <div class="message-bubble" style="color: var(--text-secondary); font-style: italic;">
+          Reading passages and formulating answer...
+        </div>
       </div>
     `;
-    messagesStream.appendChild(card);
+    messagesStream.appendChild(row);
     scrollToBottom();
   }
 
-  function removeLoadingMessage(id) {
+  function addSystemMessage(text) {
+    const row = document.createElement('div');
+    row.className = 'message-row';
+    row.innerHTML = `
+      <div class="message-avatar assistant" style="background: rgba(255,255,255,0.05); color: var(--text-secondary);">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+      </div>
+      <div class="message-content-wrapper">
+        <div class="message-bubble" style="padding: 0.75rem 1rem; font-size: 0.85rem; color: var(--text-secondary); background: transparent; border-style: dashed;">
+          ${escapeHTML(text)}
+        </div>
+      </div>
+    `;
+    messagesStream.appendChild(row);
+    scrollToBottom();
+  }
+
+  function removeElement(id) {
     const el = document.getElementById(id);
     if (el) el.remove();
   }
 
-  function addSystemMessage(text) {
-    const card = document.createElement('div');
-    card.className = 'message-card system-welcome';
-    card.innerHTML = `
-      <div class="msg-avatar system">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
-      </div>
-      <div class="msg-body">
-        <div class="msg-header">
-          <span class="msg-author">SYSTEM NOTIFICATION</span>
-          <span class="msg-time">${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-        </div>
-        <p>${escapeHTML(text)}</p>
-      </div>
-    `;
-    messagesStream.appendChild(card);
-    scrollToBottom();
-  }
-
-  // Clear Chat History
+  // Clear Chat
   btnClearHistory.addEventListener('click', async () => {
     messagesStream.innerHTML = '';
-    addSystemMessage('Chat session cleared.');
+    addSystemMessage('Conversation cleared.');
     try {
       await fetch('/api/reset', { method: 'POST' });
       await updateSystemStatus();
     } catch (_) {}
   });
 
-  // ============================================================================
-  // API KEY MODAL LOGIC
-  // ============================================================================
-
+  // API Key Modal
   btnConfigKey.addEventListener('click', () => keyModal.showModal());
   btnCloseModal.addEventListener('click', () => keyModal.close());
   btnCancelKey.addEventListener('click', () => keyModal.close());
@@ -391,14 +365,12 @@ document.addEventListener('DOMContentLoaded', () => {
       const formData = new FormData();
       formData.append('api_key', newKey);
       await fetch('/api/configure', { method: 'POST', body: formData });
-      addSystemMessage(newKey ? '✓ Gemini API Key configured. Switching to Gemini 1.5 Flash.' : 'API Key cleared. Running in local fallback mode.');
+      addSystemMessage(newKey ? 'Gemini API Key configured.' : 'API Key removed (running in offline mode).');
       await updateSystemStatus();
-    } catch (e) {
-      console.error(e);
-    }
+    } catch (_) {}
   });
 
-  // Helpers
+  // Formatting Utilities
   function scrollToBottom() {
     messagesStream.scrollTop = messagesStream.scrollHeight;
   }
@@ -413,8 +385,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }[tag] || tag));
   }
 
-  function formatAnswerText(text) {
-    // Basic Markdown bullet point & bold parser for clean layout
+  function cleanAnswerFormat(text) {
     let formatted = escapeHTML(text);
     formatted = formatted.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
     formatted = formatted.replace(/\n\n/g, '<br/><br/>');
@@ -423,6 +394,6 @@ document.addEventListener('DOMContentLoaded', () => {
     return formatted;
   }
 
-  // Initial Telemetry Kickoff
+  // Initialize
   updateSystemStatus();
 });
