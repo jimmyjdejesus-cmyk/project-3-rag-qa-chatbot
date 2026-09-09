@@ -1,0 +1,39 @@
+name: Automated Testing Pipeline
+
+# Trigger tests on push and pull requests to main/master branches
+on:
+  push:
+    branches: [ "master", "main" ]
+  pull_request:
+    branches: [ "master", "main" ]
+
+jobs:
+  test:
+    name: Pytest Unit Tests
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.11"]
+
+    steps:
+      # Step 1: Check out repository source code
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      # Step 2: Set up deterministic Python environment
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      # Step 3: Upgrade pip and install pinned requirements
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest
+          pip install -r requirements.txt
+
+      # Step 4: Run full test suite for Hybrid RAG engine (embeddings, RRF, faithfulness, guardrails)
+      - name: Execute Pytest Suite
+        run: |
+          pytest tests/ -v

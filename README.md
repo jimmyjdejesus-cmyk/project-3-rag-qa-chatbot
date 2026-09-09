@@ -1,9 +1,10 @@
 # Production Hybrid RAG Document Intelligence Engine
 
+[![Build & Test](https://github.com/jimmyjdejesus-cmyk/project-3-rag-qa-chatbot/actions/workflows/ci.yml/badge.svg)](https://github.com/jimmyjdejesus-cmyk/project-3-rag-qa-chatbot/actions)
 [![Python 3.11](https://img.shields.io/badge/python-3.11-blue.svg)](https://www.python.org/downloads/release/python-3110/)
 [![Gemini API](https://img.shields.io/badge/Google%20Gemini-1.5%20Flash-4285F4.svg)](https://ai.google.dev/)
 [![Streamlit](https://img.shields.io/badge/Streamlit-1.36-FF4B4B.svg)](https://streamlit.io/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 An enterprise-ready Retrieval-Augmented Generation (RAG) system combining Dense Vector Embeddings and Sparse TF-IDF lexical search via Reciprocal Rank Fusion (RRF) with conversational memory buffers and grounding faithfulness verification.
 
