@@ -18,11 +18,11 @@ COPY . .
 RUN useradd -m -r appuser && chown -R appuser:appuser /app
 USER appuser
 
-# Expose Streamlit port
-EXPOSE 8501
+# Expose FastAPI Web Port
+EXPOSE 8000
 
-# Healthcheck
-HEALTHCHECK CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8501/_stcore/health')" || exit 1
+# Healthcheck endpoint
+HEALTHCHECK CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/status')" || exit 1
 
-# Launch Application
-ENTRYPOINT ["streamlit", "run", "app.py", "--server.port=8501", "--server.address=0.0.0.0"]
+# Launch FastAPI Application
+ENTRYPOINT ["python", "server.py"]

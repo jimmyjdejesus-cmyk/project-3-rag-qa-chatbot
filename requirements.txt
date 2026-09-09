@@ -1,6 +1,14 @@
+# Scientific, Machine Learning & NLP Stack
 numpy==1.26.4
-streamlit==1.36.0
 scikit-learn==1.5.0
 google-generativeai==0.7.2
 pypdf==4.2.0
+
+# High-Performance Asynchronous Web API
+fastapi>=0.111.0
+uvicorn[standard]>=0.30.0
+python-multipart>=0.0.9
+
+# Testing & Client Tools
 pytest==8.2.2
+httpx>=0.27.0

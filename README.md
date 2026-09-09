@@ -2,9 +2,9 @@
 
 [![Build & Test](https://github.com/jimmyjdejesus-cmyk/project-3-rag-qa-chatbot/actions/workflows/ci.yml/badge.svg)](https://github.com/jimmyjdejesus-cmyk/project-3-rag-qa-chatbot/actions)
 [![Python 3.11](https://img.shields.io/badge/python-3.11-blue.svg)](https://www.python.org/downloads/release/python-3110/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.111-009688.svg)](https://fastapi.tiangolo.com/)
 [![Gemini API](https://img.shields.io/badge/Google%20Gemini-1.5%20Flash-4285F4.svg)](https://ai.google.dev/)
-[![Streamlit](https://img.shields.io/badge/Streamlit-1.36-FF4B4B.svg)](https://streamlit.io/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 An enterprise-ready Retrieval-Augmented Generation (RAG) system combining Dense Vector Embeddings and Sparse TF-IDF lexical search via Reciprocal Rank Fusion (RRF) with conversational memory buffers and grounding faithfulness verification.
 
@@ -84,24 +84,24 @@ Computes lexical keyword citation overlap (after applying an expanded stop-word 
 
 ## 🚀 Quickstart & Setup
 
-### Run via CLI Interface (`uv` - Recommended)
-If you have `uv` installed, execute the Streamlit app inside an isolated environment instantly:
+### Run via FastAPI & NeuralRAG Studio Web Interface (`uv` - Recommended)
 ```bash
 cd project-3-rag-qa-chatbot
-# Launch Streamlit web interface
-uv run --with-requirements requirements.txt streamlit run app.py
+# Launch high-performance FastAPI server & Cyberpunk Glassmorphism UI
+uv run python server.py
+# Access http://localhost:8000 in your browser
 ```
 
 ### Run via Standard Python Environment
 ```bash
 pip install -r requirements.txt
-streamlit run app.py
+python server.py
 ```
 
 ### Docker Container Deployment
 ```bash
 docker build -t hybrid-rag-qa .
-docker run -p 8501:8501 -e GEMINI_API_KEY="your-key" hybrid-rag-qa
+docker run -p 8000:8000 -e GEMINI_API_KEY="your-key" hybrid-rag-qa
 ```
 
 ---
